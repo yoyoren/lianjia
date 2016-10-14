@@ -113,7 +113,7 @@ var getMaxUnitPrice = function() {
 	return max_price;
 }
 
-var getDY = function(page, rooms, zhuangxiu, key, callback) {
+var getLianjia = function(zone, page, rooms, zhuangxiu, key, callback) {
 	var curPage = page;
 	if (page == 1) {
 		curPage = '';
@@ -128,10 +128,11 @@ var getDY = function(page, rooms, zhuangxiu, key, callback) {
 	if (!zhuangxiu) {
 		zhuangxiu = '';
 	}
+
 	var req = http.get({
 		hostname: 'm.lianjia.com',
 		port: 80,
-		path: '/cd/ershoufang/dayuan/' + cur_rooms + zhuangxiu + 'pg' + curPage + '?_t=1',
+		path: '/cd/ershoufang/'+ zone +'/' + cur_rooms + zhuangxiu + 'pg' + curPage + '?_t=1',
 		agent: false // create a new agent just for this one request
 	}, (res) => {
 		var content = '';
@@ -146,7 +147,7 @@ var getDY = function(page, rooms, zhuangxiu, key, callback) {
 
 			if (http_res !== 'end') {
 				console.log('request ' + page);
-				getDY(++page, rooms, zhuangxiu, key, callback);
+				getLianjia(zone,++page, rooms, zhuangxiu, key, callback);
 			} else {
 				var text = '';
 				if (rooms) {
@@ -187,21 +188,31 @@ var getDY = function(page, rooms, zhuangxiu, key, callback) {
 		// Do stuff with response
 	});
 }
+
 var log_info = function(zone) {
+	var dir = './data/'+ zone + '/';
 	file_json['summary'] = file_desc.join(',');
-	var content = fs.writeFileSync('./data/'+ zone + '/' + cur_date + '.json', JSON.stringify(file_json), 'utf-8');
+
+	fs.exists(dir, (exists) => {
+	  if(!exists){
+	  	fs.mkdirSync(dir);
+	  }
+	  var content = fs.writeFileSync('./data/'+ zone + '/' + cur_date + '.json', JSON.stringify(file_json), 'utf-8');
+	});
+	
 }
-var getDYALLInfo = function() {
-		getDY(1, 0, false, 'dy_all', function() {
-			getDY(1, 1, false, 'dy_1', function() {
-				getDY(1, 2, false, 'dy_2', function() {
-					getDY(1, 3, false, 'dy_3', function() {
-						getDY(1, 4, false, 'dy_4', function() {
-							getDY(1, 1, 'de1', 'dy_1_de1', function() {
-								getDY(1, 2, 'de1', 'dy_2_de1', function() {
-									getDY(1, 3, 'de1', 'dy_3_de1', function() {
-										getDY(1, 4, 'de1', 'dy_4_de1', function() {
-											log_info('cd/dy');
+var getALLInfo = function(zone,callback) {
+		getLianjia(zone,1, 0, false, zone + '_all', function() {
+			getLianjia(zone,1, 1, false, zone + '_1', function() {
+				getLianjia(zone,1, 2, false, zone + '_2', function() {
+					getLianjia(zone,1, 3, false, zone + '_3', function() {
+						getLianjia(zone,1, 4, false, zone + '_4', function() {
+							getLianjia(zone,1, 1, 'de1', zone + '_1_de1', function() {
+								getLianjia(zone,1, 2, 'de1', zone + '_2_de1', function() {
+									getLianjia(zone,1, 3, 'de1', zone + '_3_de1', function() {
+										getLianjia(zone,1, 4, 'de1', zone + '_4_de1', function() {
+											log_info('cd/' + zone);
+											callback && callback();
 										});
 									});
 								});
@@ -212,5 +223,13 @@ var getDYALLInfo = function() {
 			});
 		});
 	}
-	//log_info();
-getDYALLInfo();
+
+getALLInfo('dy',function(){
+getALLInfo('jinrongcheng',function(){
+getALLInfo('xinhuizhan',function(){
+	
+});
+});
+});
+
+
