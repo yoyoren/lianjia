@@ -1,0 +1,127 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>Highcharts Example</title>
+
+	<script type="text/javascript" src="http://cdn.hcharts.cn/jquery/jquery-1.8.3.min.js"></script>
+	<style type="text/css">${demo.css}</style>
+	<script type="text/javascript">
+	    var renderChart = function(obj){
+	    	obj.container.highcharts({
+			        chart: {
+			            type: 'line'
+			        },
+			        title: {
+			            text: obj.title || ''
+			        },
+			        subtitle: {
+			            text: 'Source: lianjia'
+			        },
+			        xAxis: {
+			            categories: obj.dataX
+			        },
+			        yAxis: {
+			            title: {
+			                text: obj.yaxis
+			            }
+			        },
+			        plotOptions: {
+			            line: {
+			                dataLabels: {
+			                    enabled: true
+			                },
+			                enableMouseTracking: false
+			            }
+			        },
+			        series: obj.data
+			    });
+	    };
+		$.get('/ajax/get_by_month',{},function(d){
+			var date_arr = [];
+			var unit_price = [];
+			var unit_price_1 = [];
+			var unit_price_2 = [];
+			var unit_price_3 = [];
+
+
+			for(var date in d){
+				date_arr.push(date);
+				unit_price.push(d[date]['dy_all'].unit_price)
+				unit_price_1.push(d[date]['dy_1'].unit_price)
+				unit_price_2.push(d[date]['dy_2'].unit_price)
+				unit_price_3.push(d[date]['dy_3'].unit_price)
+			}
+
+			
+
+			var unit_price_data =  [{
+			            name: '均价变化',
+			            data: unit_price
+			 },{
+			            name: '3居室均价变化',
+			            data: unit_price_3
+			 },{
+			            name: '2居室均价变化',
+			            data: unit_price_2
+			 },{
+			            name: '1居室均价变化',
+			            data: unit_price_1
+			 }];
+
+			var num = [];
+			var num_1 = [];
+			var num_2 = [];
+			var num_3 = [];
+
+			
+			for(var date in d){
+				num.push(d[date]['dy_all'].num)
+				num_1.push(d[date]['dy_1'].num)
+				num_2.push(d[date]['dy_2'].num)
+				num_3.push(d[date]['dy_3'].num)
+			}
+
+			var num_data =  [{
+			            name: '在售套数变化',
+			            data: num
+			 },{
+			            name: '3居室在售套数变化',
+			            data: num_3
+			 },{
+			            name: '2居室在售套数变化',
+			            data: num_2
+			 },{
+			            name: '1居室在售套数变化',
+			            data: num_1
+			 }];
+			$(function () {
+			    renderChart({
+			    	container:$('#unit_price_container'),
+			    	title :'大源均价变化',
+			    	data:unit_price_data,
+			    	dataX:date_arr,
+			    	yaxis:'价格'
+			    });
+
+			    renderChart({
+			    	container:$('#num_container'),
+			    	title :'大源均价在售套数',
+			    	data:num_data,
+			    	dataX:date_arr,
+			    	yaxis:'套数'
+			    });
+		    });
+		},'json');
+		</script>
+</head>
+<body>
+	<script src="http://cdn.hcharts.cn/highcharts/highcharts.js"></script>
+	<script src="http://cdn.hcharts.cn/highcharts/modules/exporting.js"></script>
+
+	<div id="unit_price_container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+	<div id="num_container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+
+</body>
+</html>
