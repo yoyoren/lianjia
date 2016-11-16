@@ -6,8 +6,21 @@
 	<title>Highcharts Example</title>
 
 	<script type="text/javascript" src="http://cdn.hcharts.cn/jquery/jquery-1.8.3.min.js"></script>
+	<!-- 新 Bootstrap 核心 CSS 文件 -->
+<link rel="stylesheet" href="http://cdn.bootcss.com/bootstrap/3.3.0/css/bootstrap.min.css">
+
+<!-- 可选的Bootstrap主题文件（一般不用引入） -->
+<link rel="stylesheet" href="http://cdn.bootcss.com/bootstrap/3.3.0/css/bootstrap-theme.min.css">
+
+<!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
+<script src="http://cdn.bootcss.com/jquery/1.11.1/jquery.min.js"></script>
+
+<!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+<script src="http://cdn.bootcss.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
 	<style type="text/css">${demo.css}</style>
 	<script type="text/javascript">
+	    var city = '<%=city%>';
+	    var zone = '<%=zone%>';
 	    var renderChart = function(obj){
 	    	obj.container.highcharts({
 			        chart: {
@@ -38,7 +51,10 @@
 			        series: obj.data
 			    });
 	    };
-		$.get('/ajax/get_by_month',{},function(d){
+		$.get('/ajax/get_by_month',{
+			city:city,
+			zone:zone
+		},function(d){
 			var date_arr = [];
 			var unit_price = [];
 			var unit_price_1 = [];
@@ -48,10 +64,10 @@
 
 			for(var date in d){
 				date_arr.push(date);
-				unit_price.push(d[date]['dy_all'].unit_price)
-				unit_price_1.push(d[date]['dy_1'].unit_price)
-				unit_price_2.push(d[date]['dy_2'].unit_price)
-				unit_price_3.push(d[date]['dy_3'].unit_price)
+				unit_price.push(d[date][zone + '_all'].unit_price)
+				unit_price_1.push(d[date][zone + '_1'].unit_price)
+				unit_price_2.push(d[date][zone + '_2'].unit_price)
+				unit_price_3.push(d[date][zone + '_3'].unit_price)
 			}
 
 			
@@ -70,6 +86,30 @@
 			            data: unit_price_1
 			 }];
 
+			var de_unit_price_1 = [];
+			var de_unit_price_2 = [];
+			var de_unit_price_3 = [];
+
+
+			for(var date in d){
+				de_unit_price_1.push(d[date][zone + '_1_de1'].unit_price)
+				de_unit_price_2.push(d[date][zone + '_2_de1'].unit_price)
+				de_unit_price_3.push(d[date][zone + '_3_de1'].unit_price)
+			}
+
+			
+
+			var de_unit_price_data =  [{
+			            name: '3居室均价变化',
+			            data: de_unit_price_3
+			 },{
+			            name: '2居室均价变化',
+			            data: de_unit_price_2
+			 },{
+			            name: '1居室均价变化',
+			            data: de_unit_price_1
+			 }];
+
 			var num = [];
 			var num_1 = [];
 			var num_2 = [];
@@ -77,10 +117,10 @@
 
 			
 			for(var date in d){
-				num.push(d[date]['dy_all'].num)
-				num_1.push(d[date]['dy_1'].num)
-				num_2.push(d[date]['dy_2'].num)
-				num_3.push(d[date]['dy_3'].num)
+				num.push(d[date][zone + '_all'].num)
+				num_1.push(d[date][zone + '_1'].num)
+				num_2.push(d[date][zone + '_2'].num)
+				num_3.push(d[date][zone + '_3'].num)
 			}
 
 			var num_data =  [{
@@ -96,6 +136,34 @@
 			            name: '1居室在售套数变化',
 			            data: num_1
 			 }];
+
+			
+			var de_num_1 = [];
+			var de_num_2 = [];
+			var de_num_3 = [];
+			var de_num_4 = [];
+
+			
+			for(var date in d){
+				de_num_1.push(d[date][zone + '_1_de1'].num);
+				de_num_2.push(d[date][zone + '_2_de1'].num);
+				de_num_3.push(d[date][zone + '_3_de1'].num);
+				de_num_4.push(d[date][zone + '_4_de1'].num);
+			}
+
+			var de_num_data =  [{
+			            name: '4居在售套数变化',
+			            data: de_num_4
+			 },{
+			            name: '3居室在售套数变化',
+			            data: de_num_3
+			 },{
+			            name: '2居室在售套数变化',
+			            data: de_num_2
+			 },{
+			            name: '1居室在售套数变化',
+			            data: de_num_1
+			 }];
 			$(function () {
 			    renderChart({
 			    	container:$('#unit_price_container'),
@@ -106,9 +174,25 @@
 			    });
 
 			    renderChart({
+			    	container:$('#de_unit_price_container'),
+			    	title :'精装均价变化',
+			    	data:de_unit_price_data,
+			    	dataX:date_arr,
+			    	yaxis:'价格'
+			    });
+
+			    renderChart({
 			    	container:$('#num_container'),
-			    	title :'大源均价在售套数',
+			    	title :'大源在售套数',
 			    	data:num_data,
+			    	dataX:date_arr,
+			    	yaxis:'套数'
+			    });
+
+			    renderChart({
+			    	container:$('#de_num_container'),
+			    	title :'精装在售套数',
+			    	data:de_num_data,
 			    	dataX:date_arr,
 			    	yaxis:'套数'
 			    });
@@ -119,9 +203,56 @@
 <body>
 	<script src="http://cdn.hcharts.cn/highcharts/highcharts.js"></script>
 	<script src="http://cdn.hcharts.cn/highcharts/modules/exporting.js"></script>
+	<style type="text/css">
+	.container {min-width: 310px; height: 400px; margin: 0 auto}
+	</style>
+	    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">Project name</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href="#">Dashboard</a></li>
+            <li><a href="#">Settings</a></li>
+            <li><a href="#">Profile</a></li>
+            <li><a href="#">Help</a></li>
+          </ul>
+          <form class="navbar-form navbar-right">
+            <input type="text" class="form-control" placeholder="Search...">
+          </form>
+        </div>
+      </div>
+    </nav>
 
-	<div id="unit_price_container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
-	<div id="num_container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
-
+    <div class="container-fluid">
+      <div class="row" style="margin-top:60px;">
+        <div class="col-sm-3 col-md-2 sidebar">
+          <% for (var city in configData) {%>
+          <ul class="nav nav-sidebar">
+            <% for (var zone in configData[city]) {%>
+            	 <li><a href="/?city=<%=city%>&zone=<%=configData[city][zone]%>"><%=configData[city][zone]%></a></li>
+            <% } %>
+          </ul>
+          <% } %>
+        </div>
+        <div class="col-sm-9 col-md-10 main">
+          <h1 class="page-header">Dashboard</h1>
+          <div class="table-responsive">
+           <div id="unit_price_container" class="container"></div>
+			<div id="de_unit_price_container" class="container"></div>
+			<div id="num_container" class="container"></div>
+			<div id="de_num_container" class="container"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+	
 </body>
 </html>

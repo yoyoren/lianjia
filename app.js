@@ -13,15 +13,27 @@ app.use(koa_static({
 	rootPath: '/static/',
 	maxage: 0
 }));
-
+var querystring = require('querystring')
 app.use(controller.get('/', function*(){
 	this.set('Cache-Control', 'no-cache');
-	this.body = yield render('index');
+	var params = querystring.parse(this.req._parsedUrl.query);
+	var city = params.city || 'cd';
+	var zone = params.zone || 'dy';
+	var configData = require('./config.js');
+	configData = configData.data;
+	this.body = yield render('index',{
+		city:city,
+		zone:zone,
+		configData:configData
+	});
 }));
 
 app.use(controller.get('/ajax/get_by_month', function*(){
 	this.set('Cache-Control', 'no-cache');
-	this.body = service.get_by_month();
+	var params = querystring.parse(this.req._parsedUrl.query);
+	var city = params.city || 'cd';
+	var zone = params.zone || 'dy';
+	this.body = service.get_by_month({city:city,zone:zone});
 }));
 
 
